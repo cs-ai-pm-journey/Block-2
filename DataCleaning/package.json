@@ -1,0 +1,13 @@
+{
+  "name": "semantic-prep",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "csv": "^6.3.2",
+    "uuid": "^9.0.1"
+  }
+}

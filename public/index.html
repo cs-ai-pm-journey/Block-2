@@ -1,0 +1,30 @@
+<!-- File: public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic Search Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-3xl font-bold mb-6 text-center">Help-Desk Copilot Demo</h1>
+        <p class="text-gray-600 text-center mb-8">Ask a question to find the most relevant support logs.</p>
+        <form id="search-form" class="flex flex-col md:flex-row gap-4 mb-8">
+            <input type="text" id="query-input" placeholder="Type your question here..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">Search</button>
+        </form>
+        <div id="results-container" class="space-y-4"></div>
+        <p id="feedback-message" class="text-center text-gray-500 mt-4 hidden">Was this helpful? 👍 / 👎</p>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
