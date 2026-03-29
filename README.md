@@ -2,13 +2,15 @@
 
 **AI-powered document search using embeddings and vector similarity**
 
+**Live Demo:** [localhost:3000](http://localhost:3000) | **GitHub:** [cs-ai-pm-journey/Block2](https://github.com/cs-ai-pm-journey/Block2)
+
 ---
 
 ## 🎯 Overview
 
-A production-ready semantic search system that understands **meaning**, not just keywords. Built to solve the "synonym problem" where traditional keyword search fails (e.g., searching "PTO" wouldn't find documents about "vacation").
+A semantic search system that retrieves support documents by **meaning**, not just keywords. Built to solve the "synonym problem" where traditional keyword search fails (e.g., searching "PTO" wouldn't find documents about "vacation").
 
-This project demonstrates foundational skills in **Retrieval-Augmented Generation (RAG)**, vector databases, and semantic similarity - core technologies behind modern AI applications.
+This project demonstrates foundational skills in **Retrieval-Augmented Generation (RAG)**, vector databases, and semantic similarity - the retrieval layer that powers modern AI applications like ChatGPT, Perplexity, and GitHub Copilot.
 
 ---
 
@@ -23,19 +25,19 @@ This project demonstrates foundational skills in **Retrieval-Augmented Generatio
 - **ETL Pipeline:** Automated document ingestion and preprocessing
 - **Vector Store:** Supabase with `pgvector` extension
 - **Embeddings:** OpenAI `text-embedding-3-small` (1536 dimensions)
-- **Similarity Search:** Cosine similarity with RPC functions
+- **Similarity Search:** Cosine similarity with PostgreSQL RPC functions
 
 ### 💡 **Intelligent Answering**
-- Generates contextual answers from retrieved documents
+- Generates contextual answers from retrieved documents using GPT-4
 - Cites top sources with relevance scores
-- Returns "no results" gracefully when confidence is low
+- Returns "no results" gracefully when confidence is low (reliability over hallucination)
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results → GPT-4 Answer Generation → Response
+User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results → GPT-4 Answer → Response
 ```
 
 ### Tech Stack
@@ -45,6 +47,7 @@ User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results �
 | **Embeddings** | OpenAI `text-embedding-3-small` | Convert text to 1536-dim vectors |
 | **Vector DB** | Supabase + `pgvector` | Store & search embeddings |
 | **Similarity** | Cosine distance | Rank results by semantic relevance |
+| **Answer Generation** | GPT-4 | Synthesize contextual answers |
 | **Backend** | Node.js + Express | API server |
 | **Frontend** | Vanilla JS | Simple search interface |
 
@@ -61,8 +64,8 @@ User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results �
 ### 1. Clone & Install
 
 ```bash
-git clone <your-repo-url>
-cd block2-semantic-search
+git clone https://github.com/cs-ai-pm-journey/Block2.git
+cd Block2
 npm install
 ```
 
@@ -168,6 +171,7 @@ node server.js
 ```
 "My printer won't connect to the network"
 → Returns: Network issues, driver problems, hardware failures
+→ Relevance: 0.77-0.83
 ```
 
 **Account Management:**
@@ -176,10 +180,10 @@ node server.js
 → Returns: Account settings, payment methods, subscription management
 ```
 
-**Feature Requests:**
+**Category Analysis:**
 ```
-"Can you add dark mode?"
-→ Returns: UI customization requests, accessibility features
+"What category of problems do we get tickets for?"
+→ Returns: System disruptions, billing errors, hardware issues, network problems
 ```
 
 ### API Endpoint
@@ -202,7 +206,8 @@ curl -X POST http://localhost:3000/search \
     {
       "id": 42,
       "content": "Dear Support Team, I am reporting a recurring issue with the Laser Printer...",
-      "similarity": 0.83
+      "similarity": 0.83,
+      "source": "support_tickets_1.csv"
     }
   ]
 }
@@ -214,7 +219,7 @@ curl -X POST http://localhost:3000/search \
 
 ### 1. Document Ingestion (ETL Pipeline)
 
-```javascript
+```
 CSV File → Parse Rows → Chunk Text → Generate Embeddings → Store in Supabase
 ```
 
@@ -223,7 +228,7 @@ Long documents are split into ~8000 character chunks to fit embedding model limi
 
 ### 2. Search Flow
 
-```javascript
+```
 User Query → Embed Query → Vector Search → Rank by Cosine Similarity → Return Top 5
 ```
 
@@ -242,6 +247,8 @@ Based on these support tickets, answer the user's question.
 If the documents don't contain relevant information, say so.
 Cite specific details from the tickets in your answer.
 ```
+
+**Key Design Decision:** The system prioritizes **reliability over completeness**. If retrieved documents aren't relevant (similarity < 0.7), it returns "No relevant results found" rather than hallucinating an answer.
 
 ---
 
@@ -263,9 +270,34 @@ Cite specific details from the tickets in your answer.
 
 ### Costs (per 1000 queries)
 
-- **Embeddings:** ~$0.02 (query embeddings)
-- **Generation:** ~$0.50 (GPT-4 answers)
+- **Embeddings:** ~$0.02 (query embeddings only, documents embedded once)
+- **Generation:** ~$0.50 (GPT-4 answer synthesis)
 - **Total:** ~$0.52 per 1000 searches
+
+---
+
+## 📊 Product Documentation
+
+This project includes comprehensive PM artifacts demonstrating end-to-end product thinking:
+
+### **UX Walkthrough**
+A 4-page guide explaining design decisions and trust-building mechanisms:
+- **Empty state design:** Minimal cognitive load with clear placeholder guidance
+- **Successful search results:** Source citation for trust and verification
+- **"No results" handling:** Reliability over bad answers - manages expectations and prevents user frustration
+- **[View Full UX Walkthrough PDF](./docs/B2W3_Help-Desk_Copilot_UX_Walkthrough.pdf)**
+
+### **RAG Evaluation Framework**
+Structured evaluation methodology using:
+- **Precision metrics:** How many retrieved docs are relevant?
+- **Recall metrics:** Did we miss critical information?
+- **Answer quality:** Human evaluation rubric (accuracy, completeness, clarity)
+- **[View Evaluation Spreadsheet](./docs/B2W3_RAG_Evaluation_Sheet.xlsx)**
+
+### **Screenshots**
+- [Empty Search State](./docs/B2W3_Walkthrough_SS_Empty_Search_Page.png) - Clean, focused interface
+- [Successful Search Result](./docs/B2W3_Walkthrough_SS_Successful_Search_Result.png) - Answer with source citations
+- [No Results Found](./docs/B2W3_Walkthrough_SS_No_Results_Found.png) - Graceful failure handling
 
 ---
 
@@ -273,38 +305,43 @@ Cite specific details from the tickets in your answer.
 
 ### Technical Skills
 
-✅ **Vector Embeddings:** Converting text to high-dimensional vectors  
+✅ **Vector Embeddings:** Converting text to high-dimensional vectors for semantic comparison  
 ✅ **Semantic Search:** Cosine similarity vs keyword matching  
-✅ **ETL Pipelines:** Automated data ingestion & transformation  
-✅ **Database Design:** Indexing strategies for vector search  
-✅ **API Design:** RESTful endpoints for search systems
+✅ **ETL Pipelines:** Automated data ingestion, transformation, and loading  
+✅ **Database Design:** Indexing strategies for vector search (IVFFlat)  
+✅ **API Design:** RESTful endpoints for search systems  
+✅ **Prompt Engineering:** Constraining LLM outputs to reduce hallucination
 
 ### Product Management Skills
 
-✅ **Stakeholder Management:** Demonstrating ROI of semantic search  
-✅ **Success Metrics:** Defining relevance scores & precision  
-✅ **User Research:** Understanding search intent vs query text  
-✅ **Cost Analysis:** Balancing embedding costs vs search quality
+✅ **Stakeholder Management:** Demonstrating ROI of semantic search to support teams  
+✅ **Success Metrics:** Defining relevance scores, precision/recall, and answer quality  
+✅ **User Research:** Understanding search intent vs literal query text  
+✅ **Cost Analysis:** Balancing embedding costs vs search quality  
+✅ **Trust Design:** Why source citations are non-negotiable for professional users  
+✅ **Evaluation Frameworks:** Structured methodology for measuring RAG quality
 
 ---
 
 ## 🔮 Future Enhancements
 
 **Phase 1: Retrieval Improvements**
-- [ ] Hybrid search (keywords + semantic)
-- [ ] Query expansion (synonyms, related terms)
-- [ ] Metadata filtering (date, category, source)
+- [ ] Hybrid search (combine keywords + semantic for better recall)
+- [ ] Query expansion (add synonyms, related terms)
+- [ ] Metadata filtering (date range, category, source type)
+- [ ] Reranking layer (use cross-encoder for better precision)
 
 **Phase 2: Advanced Features**
 - [ ] Multi-language support
 - [ ] Document summarization
 - [ ] Conversation memory (follow-up questions)
+- [ ] Feedback loop (thumbs up/down to improve results)
 
 **Phase 3: Production Readiness**
-- [ ] Caching layer (Redis)
-- [ ] Rate limiting
-- [ ] Analytics dashboard
-- [ ] A/B testing framework
+- [ ] Caching layer (Redis) for frequent queries
+- [ ] Rate limiting and authentication
+- [ ] Analytics dashboard (query patterns, result quality)
+- [ ] A/B testing framework for prompt optimization
 
 ---
 
@@ -315,6 +352,10 @@ block2-semantic-search/
 ├── data/                          # CSV source documents
 │   ├── support_tickets_1.csv
 │   └── customer_complaints_2.csv
+├── docs/                          # PM artifacts
+│   ├── B2W3_Help-Desk_Copilot_UX_Walkthrough.pdf
+│   ├── B2W3_RAG_Evaluation_Sheet.xlsx
+│   └── screenshots/
 ├── scripts/
 │   └── ingest_data.js            # ETL pipeline
 ├── public/
@@ -333,7 +374,7 @@ block2-semantic-search/
 ### "Invalid API key" error
 
 **Problem:** Supabase anon key is from wrong project  
-**Fix:** Get fresh key from Dashboard → Settings → API
+**Fix:** Get fresh key from Dashboard → Settings → API (make sure it's from the correct project)
 
 ### "Could not find function match_documents"
 
@@ -359,19 +400,33 @@ await new Promise(resolve => setTimeout(resolve, 1000)); // 1 sec delay
 ## 🎤 Demo Script (2 Minutes)
 
 **Opening:**
-> "This is my semantic search engine. Traditional keyword search fails when users type synonyms—searching 'PTO' wouldn't find documents about 'vacation.' My system understands meaning, not just exact matches."
+> "This is my semantic search engine - the foundational retrieval layer for RAG systems. Traditional keyword search fails when users type synonyms. Searching 'PTO' wouldn't find documents about 'vacation.' My system understands meaning, not just exact matches."
 
 **Demo:**
 1. Show search for "printer won't connect"
 2. Point out relevance scores (0.77-0.83)
 3. Highlight diverse results: network issues, drivers, hardware
-4. Show generated answer with citations
+4. Show generated answer with source citations
 
 **Technical Deep Dive:**
-> "Under the hood, I'm using OpenAI embeddings to convert text into 1536-dimensional vectors, then performing cosine similarity search with Supabase's pgvector extension. The ETL pipeline ingests CSV documents, chunks them, generates embeddings, and stores them with proper indexing for fast retrieval."
+> "Under the hood, I'm using OpenAI embeddings to convert text into 1536-dimensional vectors, then performing cosine similarity search with Supabase's pgvector extension. The ETL pipeline ingests CSV documents, chunks them, generates embeddings, and stores them with IVFFlat indexing for fast retrieval."
 
-**Business Value:**
-> "This reduced customer support search time by 40% and improved answer accuracy significantly. It's the foundation for any RAG system—which I built on in Block 6 with autonomous routing."
+**PM Value:**
+> "Notice the 'No Results Found' message - this was a deliberate design choice. I prioritized reliability over completeness. A wrong answer erodes trust faster than no answer. The source citations let users verify information, which is critical for professional tools.
+>
+> This is the foundation I built on in Block 6, where I added autonomous routing between internal knowledge and live web search."
+
+**Business Impact:**
+> "This reduced support agent search time by 40% in testing. More importantly, it's the retrieval layer that powers any RAG application - which is why understanding this foundation was critical before building more complex agentic systems."
+
+---
+
+## 📚 Related Projects
+
+**Block 5:** [AI Story Generator](https://github.com/cs-ai-pm-journey/Block5) - LangChain-based user story generation with Reflexion loop  
+**Block 6:** [Market Intelligence Agent](https://github.com/cs-ai-pm-journey/Block6) - Hybrid RAG with autonomous routing  
+**Block 7:** [ROI Calculator](https://github.com/cs-ai-pm-journey/Block7) - React app for AI business case development  
+**VoC V0:** [Voice of Customer Dashboard](https://github.com/cs-ai-pm-journey/VoC-V0) - Clustering + embeddings for support ticket analysis
 
 ---
 
@@ -381,10 +436,14 @@ await new Promise(resolve => setTimeout(resolve, 1000)); // 1 sec delay
 - [OpenAI Embeddings Guide](https://platform.openai.com/docs/guides/embeddings)
 - [Pgvector Documentation](https://github.com/pgvector/pgvector)
 - [Cosine Similarity Explained](https://en.wikipedia.org/wiki/Cosine_similarity)
+- [RAG Paper (Lewis et al.)](https://arxiv.org/abs/2005.11401)
 
-**Related Projects:**
-- **Block 6:** Market Intelligence Agent (Hybrid RAG with routing)
-- **VoC V0:** Voice of Customer Dashboard (Clustering + Embeddings)
+**Learning Path:**
+This project represents Week 2 of my AI PM roadmap. The progression was:
+1. **Block 1:** Chatbot basics (prompt engineering)
+2. **Block 2:** Semantic search (this project) ← **You are here**
+3. **Block 6:** Hybrid RAG with routing
+4. **VoC V0:** Clustering + RAG for insights
 
 ---
 
@@ -397,18 +456,25 @@ MIT License - feel free to use this for learning or your own projects!
 ## 👤 Author
 
 **Adam Saulters**  
-Aspiring Applied AI PM
+AI Product Manager | Transitioning to Applied AI PM
 
-- Portfolio: [Your Portfolio URL]
-- LinkedIn: [Your LinkedIn]
-- GitHub: [Your GitHub]
+- **Portfolio:** [adamsaulters.com](https://adamsaulters.com)
+- **LinkedIn:** [linkedin.com/in/adamsaulters](https://linkedin.com/in/adamsaulters)
+- **GitHub:** [cs-ai-pm-journey](https://github.com/cs-ai-pm-journey)
 
 ---
 
 ## ⭐ Acknowledgments
 
-Built as part of my 18-block AI PM roadmap to transition into Applied AI Product Management. This project demonstrates foundational RAG skills that power modern AI applications like ChatGPT, Perplexity, and GitHub Copilot.
+Built as **Block 2** of my 18-block AI PM roadmap to transition into Applied AI Product Management. This project demonstrates foundational RAG retrieval skills that power modern AI applications.
+
+**What makes this project different from tutorials:**
+- ✅ Production-quality code with error handling
+- ✅ Comprehensive PM artifacts (UX walkthrough, evaluation framework)
+- ✅ Real cost analysis and performance metrics
+- ✅ Thoughtful UX decisions (reliability over speed)
+- ✅ Part of a learning journey documented on [adamsaulters.com](https://adamsaulters.com)
 
 ---
 
-**Questions?** Open an issue or reach out on LinkedIn!
+**Questions or feedback?** Reach out on [LinkedIn](https://linkedin.com/in/adamsaulters) or open an issue!
