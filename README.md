@@ -456,7 +456,7 @@ MIT License - feel free to use this for learning or your own projects!
 ## 👤 Author
 
 **Adam Saulters**  
-AI Product Manager | Transitioning to Applied AI PM
+Aspiring Applied AI PM  
 
 - **Portfolio:** [adamsaulters.com](https://adamsaulters.com)
 - **LinkedIn:** [linkedin.com/in/adamsaulters](https://linkedin.com/in/adamsaulters)
