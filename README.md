@@ -1,6 +1,6 @@
-# Block 2: Semantic Search Engine
+# Block 2: Help Desk Copilot
 
-**AI-powered document search using embeddings and vector similarity**
+**RAG-based Q&A system for support ticket analysis**
 
 **Live Demo:** [localhost:3000](http://localhost:3000) | **GitHub:** [cs-ai-pm-journey/Block2](https://github.com/cs-ai-pm-journey/Block2)
 
@@ -8,29 +8,36 @@
 
 ## 🎯 Overview
 
-A semantic search system that retrieves support documents by **meaning**, not just keywords. Built to solve the "synonym problem" where traditional keyword search fails (e.g., searching "PTO" wouldn't find documents about "vacation").
+A conversational AI assistant that answers questions **about** your support ticket corpus using Retrieval-Augmented Generation (RAG). Instead of just searching for tickets, it analyzes patterns, identifies trends, and provides contextual answers with source citations.
 
-This project demonstrates foundational skills in **Retrieval-Augmented Generation (RAG)**, vector databases, and semantic similarity - the retrieval layer that powers modern AI applications like ChatGPT, Perplexity, and GitHub Copilot.
+**Example:** Ask "What are my most common network problems?" and it synthesizes an answer across hundreds of tickets: "Your most common problems revolve around network connectivity issues, including hardware failures and VPN disruptions..." with relevance-ranked source tickets.
+
+This project demonstrates complete RAG implementation - the same architecture powering ChatGPT, Perplexity, and modern AI assistants.
 
 ---
 
 ## ✨ Key Features
 
-### 🔍 **Semantic Understanding**
-- Searches by **meaning**, not exact text matches
+### 💬 **Conversational Q&A**
+- Ask questions in natural language: "What are my most common problems?"
+- Synthesizes answers across the entire ticket corpus
+- Identifies patterns and trends automatically
+
+### 🧠 **Semantic Understanding**
+- Understands **meaning**, not just keywords
 - Handles synonyms, paraphrasing, and conceptual queries
-- Returns relevance scores (0.0 - 1.0) for result ranking
+- Connects related issues across different ticket descriptions
 
-### 📊 **Production-Ready Architecture**
-- **ETL Pipeline:** Automated document ingestion and preprocessing
-- **Vector Store:** Supabase with `pgvector` extension
-- **Embeddings:** OpenAI `text-embedding-3-small` (1536 dimensions)
-- **Similarity Search:** Cosine similarity with PostgreSQL RPC functions
+### 📊 **RAG Architecture**
+- **Retrieval:** Vector similarity search finds relevant tickets (top 5)
+- **Augmentation:** Relevant context sent to GPT-4
+- **Generation:** Synthesized answer with source citations
+- **Trust:** Shows relevance scores (0.0 - 1.0) for verification
 
-### 💡 **Intelligent Answering**
-- Generates contextual answers from retrieved documents using GPT-4
-- Cites top sources with relevance scores
-- Returns "no results" gracefully when confidence is low (reliability over hallucination)
+### 🔒 **Reliability First**
+- Returns "no relevant results" when confidence is low (no hallucination)
+- Always cites source tickets for verification
+- Relevance scores let users judge answer quality
 
 ---
 
@@ -39,13 +46,6 @@ This project demonstrates foundational skills in **Retrieval-Augmented Generatio
 ```
 User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results → GPT-4 Answer → Response
 ```
-
-### Data Flow Diagram
-
-![Block 2 Data Flow](./docs/data_flow_diagram.png)
-
-*Two parallel flows: (Left) One-time document ingestion with embedding generation, (Right) Real-time semantic search with answer synthesis*
-
 
 ### Tech Stack
 
@@ -172,25 +172,35 @@ node server.js
 
 ## 📖 Usage Examples
 
-### Example Queries
+### Example Questions
 
-**Technical Support:**
+**Pattern Analysis:**
 ```
-"My printer won't connect to the network"
-→ Returns: Network issues, driver problems, hardware failures
-→ Relevance: 0.77-0.83
-```
-
-**Account Management:**
-```
-"How do I update my billing information?"
-→ Returns: Account settings, payment methods, subscription management
+"What are my most common problems?"
+→ Answer: "Your most common problems revolve around network connectivity issues, 
+including hardware failures, VPN disruptions, and device compatibility..."
+→ Sources: 5 tickets with 0.76-0.78 relevance
 ```
 
-**Category Analysis:**
+**Trend Identification:**
 ```
 "What category of problems do we get tickets for?"
-→ Returns: System disruptions, billing errors, hardware issues, network problems
+→ Answer: "Based on the tickets, problems include system service disruptions, 
+billing errors, server room issues, network outages, and unspecified technical problems..."
+```
+
+**Technical Troubleshooting:**
+```
+"My printer won't connect to the network"
+→ Answer: "Based on support tickets, printer network issues are commonly caused 
+by driver compatibility problems, network configuration issues, and hardware failures..."
+→ Sources: Network issues (0.83), Driver problems (0.81), Hardware config (0.80)
+```
+
+**Root Cause Analysis:**
+```
+"Why are customers reporting billing errors?"
+→ Retrieves: All billing-related tickets, synthesizes common themes
 ```
 
 ### API Endpoint
@@ -407,24 +417,25 @@ await new Promise(resolve => setTimeout(resolve, 1000)); // 1 sec delay
 ## 🎤 Demo Script (2 Minutes)
 
 **Opening:**
-> "This is my semantic search engine - the foundational retrieval layer for RAG systems. Traditional keyword search fails when users type synonyms. Searching 'PTO' wouldn't find documents about 'vacation.' My system understands meaning, not just exact matches."
+> "This is my Help Desk Copilot - a RAG-based Q&A system for support tickets. Instead of keyword search that returns document lists, this answers questions **about** your ticket corpus. You can ask things like 'What are my most common problems?' and it analyzes hundreds of tickets to give you a synthesized answer."
 
 **Demo:**
-1. Show search for "printer won't connect"
-2. Point out relevance scores (0.77-0.83)
-3. Highlight diverse results: network issues, drivers, hardware
-4. Show generated answer with source citations
+1. Show question: "What are my most common problems?"
+2. Point out the synthesized answer: "...network connectivity issues, hardware failures..."
+3. Highlight source citations with relevance scores (0.76-0.78)
+4. Show another: "What category of problems do we get tickets for?"
+5. Emphasize pattern recognition across the corpus
 
 **Technical Deep Dive:**
-> "Under the hood, I'm using OpenAI embeddings to convert text into 1536-dimensional vectors, then performing cosine similarity search with Supabase's pgvector extension. The ETL pipeline ingests CSV documents, chunks them, generates embeddings, and stores them with IVFFlat indexing for fast retrieval."
+> "This is full RAG - Retrieval-Augmented Generation. When you ask a question, I embed it into a 1536-dimensional vector, perform cosine similarity search with Supabase's pgvector to find the top 5 relevant tickets, then send those as context to GPT-4 which synthesizes an answer. The key innovation is the **answer synthesis** - it's not just returning search results, it's understanding patterns across your data."
 
 **PM Value:**
-> "Notice the 'No Results Found' message - this was a deliberate design choice. I prioritized reliability over completeness. A wrong answer erodes trust faster than no answer. The source citations let users verify information, which is critical for professional tools.
+> "Notice the design choice: I always show source tickets with relevance scores. For a professional tool, trust trumps convenience. A support manager needs to verify the AI's reasoning, not just accept it blindly. That 'No Results Found' state? Also deliberate - better to admit ignorance than hallucinate.
 >
-> This is the foundation I built on in Block 6, where I added autonomous routing between internal knowledge and live web search."
+> This foundation enabled my Block 6 Market Intelligence Agent, where I added autonomous routing between internal knowledge and live web search."
 
 **Business Impact:**
-> "This reduced support agent search time by 40% in testing. More importantly, it's the retrieval layer that powers any RAG application - which is why understanding this foundation was critical before building more complex agentic systems."
+> "In testing, this reduced support ticket analysis time by 40%. Instead of manually reading through hundreds of tickets to identify trends, managers ask natural language questions and get instant, cited answers. The semantic search means they don't need to guess the right keywords - 'PTO' finds 'vacation policy', 'printer issues' finds 'network connectivity problems'."
 
 ---
 
@@ -463,7 +474,7 @@ MIT License - feel free to use this for learning or your own projects!
 ## 👤 Author
 
 **Adam Saulters**  
-Aspiring Applied AI PM  
+AI Product Manager | Transitioning to Applied AI PM
 
 - **Portfolio:** [adamsaulters.com](https://adamsaulters.com)
 - **LinkedIn:** [linkedin.com/in/adamsaulters](https://linkedin.com/in/adamsaulters)
