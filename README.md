@@ -42,7 +42,7 @@ User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results �
 
 ### Data Flow Diagram
 
-![Block 2 Data Flow](./docs/block2_data_flow.png)
+![Block 2 Data Flow](./docs/data_flow_diagram.png)
 
 *Two parallel flows: (Left) One-time document ingestion with embedding generation, (Right) Real-time semantic search with answer synthesis*
 
