@@ -40,6 +40,13 @@ This project demonstrates foundational skills in **Retrieval-Augmented Generatio
 User Query → OpenAI Embedding → Vector Search (pgvector) → Top 5 Results → GPT-4 Answer → Response
 ```
 
+### Data Flow Diagram
+
+![Block 2 Data Flow](./docs/block2_data_flow.png)
+
+*Two parallel flows: (Left) One-time document ingestion with embedding generation, (Right) Real-time semantic search with answer synthesis*
+
+
 ### Tech Stack
 
 | Component | Technology | Purpose |
